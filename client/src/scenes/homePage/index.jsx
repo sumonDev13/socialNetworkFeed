@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import Navbar from "../navbar";
 import MyPostWidget from "../../scenes/widgets/MyPostWidget";
 import PostsWidget from "../../scenes/widgets/PostsWidget";
+import UserWidget from "../widgets/UserWidget";
 
 
 
@@ -21,6 +22,7 @@ const HomePage = () => {
         justifyContent="space-between"
       >
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
+        <UserWidget userId={_id} picturePath={picturePath} />
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? "42%" : undefined}

@@ -9,6 +9,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dbConnection } from "./config/db.js";
 
+
+
 import { register } from "./controllers/auth-controller.js";
 import { createPost } from "./controllers/post-controller.js";
 import { verifyToken } from "./middleware/auth-middleware.js";
