@@ -15,6 +15,8 @@ import { verifyToken } from "./middleware/auth-middleware.js";
 
 
 import authRoute from "./routes/auth.js";
+import usersRoute from './routes/users.js'
+import postRoute from './routes/posts.js'
 
 
 /* CONFIGURATIONS */
@@ -45,6 +47,8 @@ app.post("/auth/register", upload.single("picture"), register);
 app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 app.use("/auth", authRoute);
+app.use("/users", usersRoute);
+app.use("/posts", postRoute);
 
 const port = process.env.PORT || 5000;
 dbConnection();
