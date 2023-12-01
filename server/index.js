@@ -10,8 +10,12 @@ import { fileURLToPath } from "url";
 import { dbConnection } from "./config/db.js";
 
 import { register } from "./controllers/auth-controller.js";
+import { createPost } from "./controllers/post-controller.js";
+import { verifyToken } from "./middleware/auth-middleware.js";
+
 
 import authRoute from "./routes/auth.js";
+
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +42,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.post("/auth/register", upload.single("picture"), register);
+app.post("/posts", verifyToken, upload.single("picture"), createPost);
 
 app.use("/auth", authRoute);
 
