@@ -6,7 +6,6 @@ import Navbar from "../navbar/";
 import MyPostWidget from "../../scenes/widgets/MyPostWidget";
 import PostsWidget from "../../scenes/widgets/PostsWidget";
 
-
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const { userId } = useParams();
@@ -39,9 +38,7 @@ const ProfilePage = () => {
         justifyContent="center"
       >
         <Box flexBasis={isNonMobileScreens ? "26%" : undefined}>
-          <UserWidget userId={userId} picturePath={user.picturePath} />
           <Box m="2rem 0" />
-          <FriendListWidget userId={userId} />
         </Box>
         <Box
           flexBasis={isNonMobileScreens ? "42%" : undefined}
