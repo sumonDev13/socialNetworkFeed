@@ -9,6 +9,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { dbConnection } from "./config/db.js";
 
+import { register } from "./controllers/auth.js";
+
+import authRoute from './routes/auth.js'
+
+
 
 /* CONFIGURATIONS */
 const __filename = fileURLToPath(import.meta.url);
@@ -35,7 +40,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
+app.post("/auth/register", upload.single("picture"), register);
 
+app.use("/auth",authRoute);
 
 
 const port = process.env.PORT || 5000;
