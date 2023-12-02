@@ -10,13 +10,13 @@ import WidgetWrapper from "../../components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPost } from "../../state";
+import Friend from "../../components/Friend";
 
 const PostWidget = ({
   postId,
   postUserId,
   name,
   description,
-  location,
   picturePath,
   userPicturePath,
   likes,
@@ -48,6 +48,11 @@ const PostWidget = ({
 
   return (
     <WidgetWrapper m="2rem 0">
+      <Friend
+        friendId={postUserId}
+        name={name}
+        userPicturePath={userPicturePath}
+      />
       <Typography color={main} sx={{ mt: "1rem" }}>
         {description}
       </Typography>
