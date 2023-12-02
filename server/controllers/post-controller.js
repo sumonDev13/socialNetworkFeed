@@ -1,5 +1,6 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
+import mongoose from 'mongoose';
 
 /* CREATE */
 export const createPost = async (req, res) => {
@@ -10,7 +11,6 @@ export const createPost = async (req, res) => {
       userId,
       firstName: user.firstName,
       lastName: user.lastName,
-      location: user.location,
       description,
       userPicturePath: user.picturePath,
       picturePath,
@@ -70,4 +70,21 @@ export const likePost = async (req, res) => {
   } catch (err) {
     res.status(404).json({ message: err.message });
   }
+};
+
+/* DELETE */
+export const deletePost = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const deletedPost = await Post.findByIdAndDelete(_id);
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: 'Post not found' });
+    }
+
+    res.status(200).json({ message: 'Post deleted successfully' });
+  } catch (err) {
+    res.status(404).json({ message: err.message });
+  }
+
 };
