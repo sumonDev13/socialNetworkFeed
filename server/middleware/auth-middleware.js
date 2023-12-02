@@ -19,3 +19,12 @@ export const verifyToken = async (req, res, next) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+export const localVariables =async(req, res, next) => {
+  req.app.locals = {
+      OTP : null,
+      resetSession : false
+  }
+  next()
+}
