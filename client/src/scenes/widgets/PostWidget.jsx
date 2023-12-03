@@ -5,18 +5,19 @@ import {
   ShareOutlined,
 } from "@mui/icons-material";
 import { Box, Divider, IconButton, Typography, useTheme } from "@mui/material";
-import FlexBetween from "../../components/FlexBetween";
-import WidgetWrapper from "../../components/WidgetWrapper";
+import FlexBetween from "components/FlexBetween";
+import Friend from "components/Friend";
+import WidgetWrapper from "components/WidgetWrapper";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setPost } from "../../state";
-import Friend from "../../components/Friend";
+import { setPost } from "state";
 
 const PostWidget = ({
   postId,
   postUserId,
   name,
   description,
+  location,
   picturePath,
   userPicturePath,
   likes,
@@ -34,7 +35,7 @@ const PostWidget = ({
   const primary = palette.primary.main;
 
   const patchLike = async () => {
-    const response = await fetch(`http://localhost:8000/posts/${postId}/like`, {
+    const response = await fetch(`http://localhost:3001/posts/${postId}/like`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -51,6 +52,7 @@ const PostWidget = ({
       <Friend
         friendId={postUserId}
         name={name}
+        subtitle={location}
         userPicturePath={userPicturePath}
       />
       <Typography color={main} sx={{ mt: "1rem" }}>
@@ -62,7 +64,7 @@ const PostWidget = ({
           height="auto"
           alt="post"
           style={{ borderRadius: "0.75rem", marginTop: "0.75rem" }}
-          src={`http://localhost:8000/assets/${picturePath}`}
+          src={`http://localhost:3001/assets/${picturePath}`}
         />
       )}
       <FlexBetween mt="0.25rem">
