@@ -1,90 +1,134 @@
 import Post from "../models/Post.js";
 import User from "../models/User.js";
-import mongoose from 'mongoose';
 
-/* CREATE */
-export const createPost = async (req, res) => {
+export const getPost = async (req, res) =>{
   try {
-    const { userId, description, picturePath } = req.body;
-    const user = await User.findById(userId);
-    const newPost = new Post({
-      userId,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      description,
-      userPicturePath: user.picturePath,
-      picturePath,
-      likes: {},
-      comments: [],
-    });
-    await newPost.save();
-
-    const post = await Post.find();
-    res.status(201).json(post);
-  } catch (err) {
-    res.status(409).json({ message: err.message });
-  }
-};
-
-/* READ */
-export const getFeedPosts = async (req, res) => {
-  try {
-    const post = await Post.find();
+    const post = await Post.findById(req.params.postId);
     res.status(200).json(post);
-  } catch (err) {
-    res.status(404).json({ message: err.message });
+  } catch (error) {
+    return res.status(500).json(error.message);
   }
-};
+}
+
 
 export const getUserPosts = async (req, res) => {
   try {
-    const { userId } = req.params;
-    const post = await Post.find({ userId });
-    res.status(200).json(post);
-  } catch (err) {
-    res.status(404).json({ message: err.message });
+      const userPosts = await Post.find({ userId: req.params.id });
+      if (userPosts == false || userPosts.length <= 0) {
+          throw new Error("No posts from this user");
+      } else {
+          return res.status(200).json(userPosts);
+      }
+  } catch (error) {
+      return res.status(500).json(error.message);
   }
 };
 
-/* UPDATE */
-export const likePost = async (req, res) => {
+export const createPost = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { userId } = req.body;
-    const post = await Post.findById(id);
-    const isLiked = post.likes.get(userId);
+      const isEmpty = Object.values(req.body).some((v) => !v);
+      if (isEmpty) {
+          throw new Error("Fill all fields!");
+      }
 
-    if (isLiked) {
-      post.likes.delete(userId);
-    } else {
-      post.likes.set(userId, true);
-    }
-
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      { likes: post.likes },
-      { new: true }
-    );
-
-    res.status(200).json(updatedPost);
-  } catch (err) {
-    res.status(404).json({ message: err.message });
+      const post = await Post.create({ ...req.body, userId: req.user.id });
+      return res.status(201).json(post)
+  } catch (error) {
+      return res.status(500).json(error.message);
   }
 };
 
-/* DELETE */
+export const updatePost = async (req, res) => {
+  try {
+      const post = await Post.findById(req.params.postId);
+      if (post.userId === req.body.userId) {
+          const updatedPost = await Post.findByIdAndUpdate(
+              req.body.userId,
+              { $set: req.body },
+              { new: true }
+          );
+
+          return res.status(200).json(updatedPost);
+      } else {
+          throw new Error("You can only update your own posts");
+      }
+  } catch (error) {
+      return res.status(500).json(error.message);
+  }
+};
+
 export const deletePost = async (req, res) => {
   try {
-    const { _id } = req.params;
-    const deletedPost = await Post.findByIdAndDelete(_id);
-
-    if (!deletedPost) {
-      return res.status(404).json({ message: 'Post not found' });
-    }
-
-    res.status(200).json({ message: 'Post deleted successfully' });
-  } catch (err) {
-    res.status(404).json({ message: err.message });
+      const post = await Post.findById(req.params.postId);
+      if (post.userId === req.body.userId) {
+          await post.delete()
+          console.log('hey');
+          return res.status(200).json({ msg: "Successfully deleted post" });
+      } else {
+          throw new Error("You can only delete your own posts");
+      }
+  } catch (error) {
+      return res.status(500).json(error.message);
   }
-
 };
+
+export const likePost = async (req, res) => {
+  try {
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+          throw new Error("No such post");
+      }
+
+      const isLikedByCurrentUser = post.likes.includes(req.user.id);
+      if (isLikedByCurrentUser) {
+          throw new Error("Can't like a post two times");
+      } else {
+          await Post.findByIdAndUpdate(
+              req.params.postId,
+              { $push: { likes: req.user.id } },
+              { new: true }
+          );
+          return res.status(200).json({ msg: "Post has been successfully liked" });
+      }
+  } catch (error) {
+      return res.status(500).json(error.message);
+  }
+};
+
+export const dislikePost = async (req, res) => {
+  try {
+      const post = await Post.findById(req.params.postId);
+      if (!post) {
+          throw new Error("No such post");
+      }
+
+      const isLikedByCurrentUser = post.likes.includes(req.user.id);
+      if (isLikedByCurrentUser) {
+          await Post.findByIdAndUpdate(
+              req.params.postId,
+              { $pull: { likes: req.user.id } },
+              { new: true }
+          );
+          return res.status(200).json({ msg: "Post has been successfully liked" });
+      } else {
+          throw new Error("Can't dislike that you haven't liked");
+      }
+  } catch (error) {
+      return res.status(500).json(error.message);
+  }
+};
+
+export const getTimelinePosts = async (req, res) => {
+  try {
+      const currentUser = await User.findById(req.user.id);
+      const userPosts = await Post.find({ userId: currentUser._id });
+      const friendPosts = await Promise.all(
+          currentUser.followings.map((friendId) => {
+              return Post.find({ userId: friendId })
+          })
+      );
+      return res.json(userPosts.concat(...friendPosts).sort((a, b) => b.createdAt - a.createdAt))
+  } catch (err) {
+      res.status(500).json(err);
+  }
+}
