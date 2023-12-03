@@ -1,30 +1,18 @@
 import jwt from "jsonwebtoken";
 
-export const verifyToken = async (req, res, next) => {
-  try {
-    let token = req.header("Authorization");
+export const verifyToken = async(req, res, next) => {
+    if(!req.headers.authorization) return res.status(403).json({msg: 'Not authorized. No token'})
 
-    if (!token) {
-      return res.status(403).send("Access Denied");
+
+    if(req.headers.authorization && req.headers.authorization.startsWith("Bearer ")){
+        const token = req.headers.authorization.split(' ')[1]
+        jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
+            if(err) return res.status(403).json({msg: 'Wrong or expired token'})
+            else {
+                req.user = data // data = {id: user._id}
+                next()
+            }
+        })
     }
-
-    if (token.startsWith("Bearer ")) {
-      token = token.slice(7, token.length).trimLeft();
-    }
-
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = verified;
-    next();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-
-export const localVariables =async(req, res, next) => {
-  req.app.locals = {
-      OTP : null,
-      resetSession : false
-  }
-  next()
 }
+
