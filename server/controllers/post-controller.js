@@ -3,7 +3,7 @@ import User from "../models/User.js";
 
 export const getPost = async (req, res) =>{
   try {
-    const post = await Post.findById(req.params.postId);
+    const post = await Post.findById(req.params.id);
     res.status(200).json(post);
   } catch (error) {
     return res.status(500).json(error.message);
@@ -40,10 +40,10 @@ export const createPost = async (req, res) => {
 
 export const updatePost = async (req, res) => {
   try {
-      const post = await Post.findById(req.params.postId);
-      if (post.userId === req.body.userId) {
+      const post = await Post.findById(req.params.id);
+      if (post.userId === req.user.id) {
           const updatedPost = await Post.findByIdAndUpdate(
-              req.body.userId,
+              req.params.id,
               { $set: req.body },
               { new: true }
           );
@@ -57,19 +57,22 @@ export const updatePost = async (req, res) => {
   }
 };
 
+
 export const deletePost = async (req, res) => {
-  try {
-      const post = await Post.findById(req.params.postId);
-      if (post.userId === req.body.userId) {
-          await post.delete()
-          console.log('hey');
-          return res.status(200).json({ msg: "Successfully deleted post" });
-      } else {
-          throw new Error("You can only delete your own posts");
-      }
-  } catch (error) {
-      return res.status(500).json(error.message);
-  }
+    try {
+        const post = req.params.id;
+
+        // Find the product and delete it
+        const deletedPost = await Post.findByIdAndDelete(post);
+
+        if (deletedPost) {
+            res.status(200).json({ message: "Post deleted successfully" });
+        } else {
+            res.status(404).json({ message: "Product not found" });
+        }
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
 };
 
 export const likePost = async (req, res) => {
