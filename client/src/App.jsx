@@ -1,35 +1,21 @@
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
-import HomePage from './scenes/homePage'
-import LoginPage from "./scenes/loginPage";
-import ProfilePage from "./scenes/profilePage";
-import { useMemo } from "react";
-import { useSelector } from "react-redux";
-import { CssBaseline, ThemeProvider } from "@mui/material";
-import { createTheme } from "@mui/material/styles";
-import { themeSettings } from "./theme";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/home/Home";
+import ProfileDetails from "./pages/profileDetails/ProfileDetails";
+import UpdateProfile from "./pages/updateProfile/UpdateProfile";
+import Auth from "./pages/auth/Auth";
+
+import "./App.css";
 
 function App() {
-  const mode = useSelector((state) => state.mode);
-  const theme = useMemo(() => createTheme(themeSettings(mode)), [mode]);
-  const isAuth = Boolean(useSelector((state) => state.token));
-
   return (
     <div className="app">
       <BrowserRouter>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Routes>
-            <Route path="/" element={<LoginPage />} />
-            <Route
-              path="/home"
-              element={isAuth ? <HomePage /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/profile/:userId"
-              element={isAuth ? <ProfilePage /> : <Navigate to="/" />}
-            />
-          </Routes>
-        </ThemeProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/profile/:id" element={<ProfileDetails />} />
+          <Route path="/updateProfile/:id" element={<UpdateProfile />} />
+          <Route path="/auth" element={<Auth />} />
+        </Routes>
       </BrowserRouter>
     </div>
   );
